@@ -1,0 +1,8 @@
+06-10 15:05:36 ERROR (12457:rotater.c:108) open file[/etc/zlog.conf] fail, errno[13]
+06-10 15:05:36 ERROR (12457:conf.c:391) zlog_rotater_new fail
+06-10 15:05:36 ERROR (12457:conf.c:314) parse configure file[/etc/zlog.conf]line_no[3] fail
+06-10 15:05:36 ERROR (12457:conf.c:315) line[[rules]]
+06-10 15:05:36 ERROR (12457:conf.c:160) zlog_conf_build_with_file fail
+06-10 15:05:36 ERROR (12457:zlog.c:93) zlog_conf_new[/etc/zlog.conf] fail
+06-10 15:05:36 ERROR (12457:zlog.c:135) zlog_init_inner[/etc/zlog.conf] fail
+06-10 15:05:36 ERROR (12457:zlog.c:150) ------zlog_init fail end------
