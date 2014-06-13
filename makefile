@@ -10,8 +10,8 @@ SUBMAKE = zlog
 
 all: $(BIN)
 
-$(BIN): %: %.o zlog
-	$(CC) -L./zlog/lib -lzlog -o $@ $@.o
+$(BIN): %: zlog %.o 
+	$(CC) $@ -o $@.o -L./zlog/lib -lzlog
 
 # compiles
 %.o: %.c
