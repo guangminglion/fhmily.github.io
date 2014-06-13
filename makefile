@@ -1,4 +1,4 @@
-CC = cc -std=c11 -pedantic
+CC = cc -std=c99 -pedantic
 
 OBJ = socket.o \
 	  udc.o
@@ -21,10 +21,11 @@ $(BIN): %: %.o zlog
 socket.o: socket.c zlog/include/zlog.h
 udc.o: udc.c zlog/include/zlog.h
 
-
+# zlog install path
+ZLOG_PATH = $(shell pwd)/zlog
 
 zlog:
-	cd ./modules/zlog && $(MAKE) clean && $(MAKE) PREFIX=/Users/jack/Development/C/YID/zlog && $(MAKE) PREFIX=/Users/jack/Development/C/YID/zlog install
+	cd ./modules/zlog && $(MAKE) clean && $(MAKE) PREFIX=ZLOG_PATH && $(MAKE) PREFIX=ZLOG_PATH install
 
 .PHONY: all zlog clean
 clean:
