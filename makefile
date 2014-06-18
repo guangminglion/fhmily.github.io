@@ -1,4 +1,4 @@
-CC = cc -std=c11 -pedantic
+CC = cc -std=c99 -pedantic
 
 OBJ = socket.o \
 	  udc.o \
@@ -13,7 +13,7 @@ SUBMAKE = zlog
 all: $(BIN)
 
 $(BIN): %: zlog conf.o log.o %.o
-	$(CC) -o $@ $@.o conf.o log.o -L./zlog/lib -lzlog
+	$(CC) -Wl,-rpath,'$$ORIGIN/zlog/lib' -o $@ $@.o conf.o log.o -L./zlog/lib -lzlog
 
 # compiles
 %.o: %.c
