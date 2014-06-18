@@ -17,7 +17,7 @@ $(BIN): %: zlog conf.o log.o %.o
 
 # compiles
 %.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@ -g
 
 # deps output: cc -MM *.c
 log.o: log.c log.h zlog/include/zlog.h
