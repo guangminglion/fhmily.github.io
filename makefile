@@ -1,7 +1,9 @@
-CC = cc -std=c99 -pedantic
+CC = cc -std=c11 -pedantic
 
 OBJ = socket.o \
-	  udc.o
+	  udc.o \
+	  conf.o \
+	  log.o
 
 BIN = socket \
 	  udc
@@ -10,22 +12,23 @@ SUBMAKE = zlog
 
 all: $(BIN)
 
-$(BIN): %: zlog %.o 
-	$(CC) $@ -o $@.o -L./zlog/lib -lzlog
+$(BIN): %: zlog conf.o log.o %.o
+	$(CC) -o $@ $@.o conf.o log.o -L./zlog/lib -lzlog
 
 # compiles
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # deps output: cc -MM *.c
-socket.o: socket.c zlog/include/zlog.h
+log.o: log.c log.h zlog/include/zlog.h
+socket.o: socket.c conf.h log.h zlog/include/zlog.h
 udc.o: udc.c zlog/include/zlog.h
 
 # zlog install path
 ZLOG_PATH = $(shell pwd)/zlog
 
 zlog:
-	cd ./modules/zlog && $(MAKE) clean && $(MAKE) PREFIX=ZLOG_PATH && $(MAKE) PREFIX=ZLOG_PATH install
+	cd ./modules/zlog && $(MAKE) clean && $(MAKE) PREFIX=$(ZLOG_PATH) && $(MAKE) PREFIX=$(ZLOG_PATH) install
 
 .PHONY: all zlog clean
 clean:

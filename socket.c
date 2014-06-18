@@ -10,15 +10,15 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
+#include "conf.h"
 // third party headers
-#include "zlog/include/zlog.h"
-
+#include "log.h"
 
 #define NAME "/tmp/socket"
-zlog_category_t* c;
 
-#define HTTP200 "HTTP/1.1 200 OK\r\n\
+#define HTTP_HEADER_200 "HTTP/1.1 200 OK\r\n\
 Server: YID/0.1\r\n\
+Content-Length: %d\r\n\
 \r\n"
 
 #define END "\r\n\r\n"
@@ -52,36 +52,14 @@ int getID () {
 }
 
 
-int initLog () {
-    int rc;
-
-    rc = zlog_init("zlog.conf");
-    if (rc) {
-        zlog_info(c, "init failed\n");
-        return -1;
-    }
-
-    c = zlog_get_category("my_cat");
-    if (!c) {
-        zlog_info(c, "get cat fail\n");
-        zlog_fini();
-        return -2;
-    }
-
-    zlog_info(c, "hello, zlog");
-
-
-    return 0;
-}
-
-void finishLog () {
-    zlog_fini();
-}
 
 int main(int argc, char *argv[])
 {
+    zlog_category_t* c = getLogCategory ();
+
+    struct Conf* conf = initConf(argc, argv);
+    
     int end_size = strlen(END);
-    initLog();
 
     int sock, msgsock, rval;
     struct sockaddr_in server;
@@ -92,14 +70,18 @@ int main(int argc, char *argv[])
         zlog_error(c, "opening stream socket");
         exit(1);
     }
-    server = (struct sockaddr_in) { .sin_family = AF_INET, .sin_port = htons(8080), .sin_addr.s_addr = INADDR_ANY };
+
+    server = (struct sockaddr_in) { .sin_family = AF_INET, .sin_port = htons(conf->server_interface.port), .sin_addr.s_addr = INADDR_ANY };
 
     if (bind(sock, (struct sockaddr *) &server, sizeof(struct sockaddr))) {
         zlog_error(c, "binding socket fail");
         exit(1);
     }
 
-    char buffer[33];
+    zlog_info(c, "Binded port: %d", conf->server_interface.port);
+
+    char http_header_buffer[1024];
+    char http_body_buffer[1024];
 
     listen(sock, 100);
     for (;;) {
@@ -119,12 +101,15 @@ int main(int argc, char *argv[])
 
                 if (0 == strncmp(END, &buf[rval - end_size], end_size)) {
 
-                    send(msgsock, HTTP200, sizeof(HTTP200), 0);
                     int id = getID();
-                    sprintf(buffer, "%d", id);
-                    send(msgsock, buffer, strlen(buffer), 0);
+                    sprintf(http_body_buffer, "%d", id);
 
-                    zlog_info(c, buffer);
+                    sprintf(http_header_buffer, HTTP_HEADER_200, (int) (strlen(http_body_buffer) * sizeof(char)));
+
+                    send(msgsock, http_header_buffer, strlen(http_header_buffer), 0);
+                    send(msgsock, http_body_buffer, strlen(http_body_buffer), 0);
+
+                    zlog_info(c, "Current id: %d", id);
 
                     break;
                 }
