@@ -17,7 +17,7 @@ struct Conf* initConf (int argc, char** argv) {
     while (-1 != (arg = getopt (argc, argv, "N:k:o:l:"))) {
         switch (arg) {
             case 'N':
-                cValue = optarg;
+                cValue = strdup(optarg);
 
                 zlog_debug(c, "Find arg N: %s", cValue);
 
@@ -38,11 +38,12 @@ struct Conf* initConf (int argc, char** argv) {
                     zlog_debug(c, "Server setting: TCP:%d", conf->server_interface.port);
                 } else if ( 0 == strncmp ("UNIX", pair[0], strlen ("UNIX")) ) {
                     conf->server_mode = UNIX;
-                    conf->server_interface.path = (char*) malloc (sizeof (char) * strlen (pair[1]));
-                    strcpy (conf->server_interface.path, pair[1]);
+                    conf->server_interface.path = strdup(pair[1]);
 
                     zlog_debug(c, "Server setting: UNIX:%s", conf->server_interface.path);
                 }
+
+                free(cValue);
 
                 break;
             case 'k':
